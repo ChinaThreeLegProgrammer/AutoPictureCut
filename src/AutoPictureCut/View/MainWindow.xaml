@@ -1,0 +1,99 @@
+﻿<Window
+    x:Class="AutoPictureCut.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cv="clr-namespace:AutoPictureCut.Converter"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:AutoPictureCut"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="九宫格软件"
+    Width="800"
+    Height="450"
+    WindowState="Maximized"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <cv:TextLengthToBoolMulConverter x:Key="TextLengthToBoolMulConverter" />
+        <cv:BoolToVisibleConverter x:Key="BoolToVisibleConverter" />
+        <DataTemplate x:Key="ImageTemplate">
+            <Image
+                Width="100"
+                Height="100"
+                Source="{Binding PicturePath}"
+                ToolTip="{Binding Num}" />
+        </DataTemplate>
+    </Window.Resources>
+    <StackPanel Margin="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+                x:Name="mainTb"
+                IsEnabled="False"
+                Text="{Binding MainPicture}" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding GetPictureCommand}"
+                CommandParameter=""
+                Content="上传要处理的图片" />
+
+            <TextBox
+                x:Name="bgTb"
+                Grid.Row="1"
+                IsEnabled="False"
+                Text="{Binding BgPicture, UpdateSourceTrigger=PropertyChanged}" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="1"
+                Command="{Binding GetPictureCommand}"
+                CommandParameter="True"
+                Content="上传要衬托图片" />
+        </Grid>
+
+        <Button Command="{Binding CombineImageCommand}" Content="合成图片">
+            <Button.IsEnabled>
+                <MultiBinding Converter="{StaticResource TextLengthToBoolMulConverter}">
+                    <Binding ElementName="mainTb" Path="Text" />
+                    <Binding ElementName="bgTb" Path="Text" />
+                </MultiBinding>
+            </Button.IsEnabled>
+        </Button>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Image MaxHeight="400" Source="{Binding MainPicture}" />
+            <Image
+                Grid.Column="1"
+                MaxHeight="400"
+                Source="{Binding BgPicture}" />
+        </Grid>
+        <ListBox
+            x:Name="picListbox"
+            Width="333"
+            Height="333"
+            BorderThickness="0"
+            ItemTemplate="{StaticResource ImageTemplate}"
+            ItemsSource="{Binding CombineImageList}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+        </ListBox>
+        <Button
+            Width="350"
+            Height="35"
+            Margin="8"
+            HorizontalAlignment="Center"
+            Command="{Binding OpenDirCommand}"
+            Content="打开文件夹取图"
+            Visibility="{Binding ElementName=picListbox, Path=HasItems, Converter={StaticResource BoolToVisibleConverter}}" />
+    </StackPanel>
+</Window>
